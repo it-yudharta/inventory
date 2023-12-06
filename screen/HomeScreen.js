@@ -1,14 +1,14 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const Item = ({name}) => (
-  <View style={styles.item}>
+const Item = ({name, onPress}) => (
+  <TouchableOpacity style={styles.item} onPress={onPress}>
     <Text style={styles.title}>{name}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
@@ -28,6 +28,11 @@ const HomeScreen = () => {
     getDatas();
   }, []);
 
+  const openDetail = (id) => {
+    // console.log(id)
+    navigation.navigate('ItemDetailScreen', { itemId: id })
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {isLoading ? (
@@ -35,7 +40,7 @@ const HomeScreen = () => {
       ) : (
         <FlatList
           data={data}
-          renderItem={({item}) => <Item name={item.name} />}
+          renderItem={({item}) => <Item name={item.name} onPress={() => openDetail(item.id)} />}
           keyExtractor={item => item.id}
         />
       )}
