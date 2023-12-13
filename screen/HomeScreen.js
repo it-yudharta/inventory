@@ -14,10 +14,12 @@ const HomeScreen = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [inputName, setInputName] = useState('');
+  const [search, setSearch] = useState('');
 
-  const getDatas = async () => {
+  const getDatas = async (id = '') => {
     try {
-      const response = await fetch('https://api.restful-api.dev/objects');
+      const idQuery = (id != '') ? `?id=${id}` : ''
+      const response = await fetch(`https://api.restful-api.dev/objects${idQuery}`);
       const json = await response.json();
       setData(json);
     } catch (error) {
@@ -65,11 +67,24 @@ const HomeScreen = ({navigation}) => {
     }
   }
 
+  const searchData = async (input) => {
+    setSearch(input)
+    await getDatas(input)
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.item} onPress={addData}>
         <Text style={styles.title}>Tambah Data</Text>
       </TouchableOpacity>
+
+      <TextInput
+        style={styles.input}
+        onChangeText={searchData}
+        value={search}
+        placeholder="Cari ID"
+      />
+
       {isLoading ? (
         <ActivityIndicator style={styles.container}/>
       ) : (
