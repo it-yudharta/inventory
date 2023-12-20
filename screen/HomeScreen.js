@@ -13,6 +13,7 @@ const HomeScreen = ({navigation}) => {
   const [data, setData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const [inputId, setInputId] = useState('');
   const [inputName, setInputName] = useState('');
   const [search, setSearch] = useState('');
 
@@ -33,9 +34,10 @@ const HomeScreen = ({navigation}) => {
     getDatas();
   }, []);
 
-  const openDetail = (id) => {
-    // console.log(id)
-    navigation.navigate('ItemDetailScreen', { itemId: id })
+  const openDetail = (id, name) => {
+    setInputId(id)
+    setInputName(name)
+    setModalVisible(true)
   }
 
   const addData = () => {
@@ -43,28 +45,76 @@ const HomeScreen = ({navigation}) => {
   }
 
   const saveData = async () => {
-    try {
-      const payload = {
-        name: inputName,
-        data: {
-          year: 2023,
-          price : 2000,
-       }
+    if (inputId == '') {
+      try {
+        const payload = {
+          name: inputName,
+          data: {
+            year: 2023,
+            price : 2000,
+         }
+        }
+        const response = await fetch('https://api.restful-api.dev/objects', {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const json = await response.json();
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setModalVisible(false)
+        getDatas()
       }
-      const response = await fetch('https://api.restful-api.dev/objects', {
+    } else {
+      try {
+        const payload = {
+          name: inputName,
+          data: {
+            year: 2023,
+            price : 2000,
+        }
+        }
+        const response = await fetch('https://api.restful-api.dev/objects/' + inputId, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        const json = await response.json();
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setModalVisible(false)
+        getDatas()
+      }
+    }
+  }
+
+  const removeData = async () => {
+    try {
+      const response = await fetch('https://api.restful-api.dev/objects/' + inputId, {
         headers: {
           'Content-Type': 'application/json'
         },
-        method: 'POST',
-        body: JSON.stringify(payload)
+        method: 'DELETE',
       });
       const json = await response.json();
-      console.log(json);
     } catch (error) {
       console.error(error);
     } finally {
       setModalVisible(false)
+      getDatas()
     }
+  }
+
+  const closeModal = () => {
+    setModalVisible(false);
   }
 
   const searchData = async (input) => {
@@ -90,7 +140,7 @@ const HomeScreen = ({navigation}) => {
       ) : (
         <FlatList
           data={data}
-          renderItem={({item}) => <Item name={item.name} onPress={() => openDetail(item.id)} />}
+          renderItem={({item}) => <Item name={item.name} onPress={() => openDetail(item.id, item.name)} />}
           keyExtractor={item => item.id}
         />
       )}
@@ -115,6 +165,16 @@ const HomeScreen = ({navigation}) => {
               style={[styles.button, styles.buttonClose]}
               onPress={() => saveData()}>
               <Text style={styles.textStyle}>Simpan Data</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => removeData()}>
+              <Text style={styles.textStyle}>Hapus</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => closeModal()}>
+              <Text style={styles.textStyle}>Close</Text>
             </Pressable>
           </View>
         </View>
